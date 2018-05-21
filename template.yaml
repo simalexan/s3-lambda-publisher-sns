@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  S3EventStorage:
+    Type: AWS::S3::Bucket
+  LambdaSubscriber:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs8.10
+      Environment:
+        Variables:
+          TOPIC_ARN: !Ref SNSTopic
+      Policies:
+        - SNSCrudPolicy:
+            TopicName: !GetAtt SNSTopic.TopicName
+        - S3CrudPolicy:
+            BucketName: !Ref S3EventStorage
+      Events:
+        SubscribedTopic:
+          Type: S3
+          Properties:
+            Bucket: !Ref S3EventStorage
+  SNSTopic:
+    Type: AWS::SNS::Topic
+Outputs:
+  SNSTopic:
+    Value: !Ref SNSTopic
+    Description: The SNS topic your Lambda is publishing to
+  S3Bucket:
+    Value: !Ref S3EventStorage
+    Description: The S3 Bucket where the files are stored
