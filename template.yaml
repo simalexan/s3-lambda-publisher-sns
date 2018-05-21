@@ -2,9 +2,9 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
-  S3EventStorage:
+  S3FileStorage:
     Type: AWS::S3::Bucket
-  LambdaSubscriber:
+  LambdaPublisher:
     Type: AWS::Serverless::Function
     Properties:
       Handler: index.handler
@@ -15,13 +15,12 @@ Resources:
       Policies:
         - SNSCrudPolicy:
             TopicName: !GetAtt SNSTopic.TopicName
-        - S3CrudPolicy:
-            BucketName: !Ref S3EventStorage
       Events:
-        SubscribedTopic:
+        S3BucketEvent:
           Type: S3
           Properties:
-            Bucket: !Ref S3EventStorage
+            Bucket: !Ref S3FileStorage
+            Events: s3:ObjectCreated:*
   SNSTopic:
     Type: AWS::SNS::Topic
 Outputs:
@@ -29,5 +28,5 @@ Outputs:
     Value: !Ref SNSTopic
     Description: The SNS topic your Lambda is publishing to
   S3Bucket:
-    Value: !Ref S3EventStorage
+    Value: !Ref S3FileStorage
     Description: The S3 Bucket where the files are stored

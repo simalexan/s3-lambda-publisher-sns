@@ -5,7 +5,6 @@ const parseS3Event = require('./parse-s3-event');
 const TOPIC_ARN = process.env.TOPIC_ARN;
 
 exports.handler = (event) => {
-    console.log(event);
     let message = parseS3Event(event);
     return saveToSNS(message);
 };
@@ -15,7 +14,7 @@ saveToSNS = (data) => {
         return Promise.resolve();
     }
     return sns.publish({
-        Message: data,
+        Message: JSON.stringify(data),
         TopicArn: TOPIC_ARN
     })
     .promise()

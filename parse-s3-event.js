@@ -1,6 +1,7 @@
 module.exports = (event) => {
-	if (!event || !event.body) {
-		return undefined;
+	if (!event || !event.Records || !Array.isArray(event.Records)) {
+		return [];
   }
-	return event.body;
+  let extractMessage = record => record.s3 && record.s3.object;
+	return event.Records.map(extractMessage).filter(object => object);
 };
